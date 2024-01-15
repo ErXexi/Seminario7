@@ -2,6 +2,9 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:intl/date_time_patterns.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:seminariovalidacion/model/product.dart';
 import 'package:seminariovalidacion/providers/product_form_provider.dart';
@@ -36,54 +39,119 @@ class _ProductScreenBody extends StatelessWidget {
     final productFormProvider = Provider.of<ProductFormProvider>(context);
     return Scaffold(
       floatingActionButton: FloatingActionButton(
-        onPressed: () async {
-          if (!productFormProvider.isValidForm()) return;
-          await productsService.saveOrCreateProduct(productFormProvider.product);
-          Navigator.pop(context);
-        },
-        child: Icon(Icons.save_outlined),
-      ),
+          onPressed: () async {
+            if (!productFormProvider.isValidForm()) return;
+            final String? imageUrl = await productsService.uploadImage();
+
+            if (imageUrl != null) {
+              productsService.selectedProduct.picture = imageUrl;
+            }
+            await productsService.saveOrCreateProduct(productFormProvider.product);
+            Navigator.pop(context);
+          },
+          child: productsService.isSaving
+              ? const CircularProgressIndicator(
+                  color: Colors.white,
+                )
+              : const Icon(Icons.save_outlined)),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
-      body: SingleChildScrollView(
-        child: Column(
-          children: [
-            Stack(
-              children: [
-                ProductImage(url: productFormProvider.product.picture),
-                Positioned(
-                  top: 60,
-                  left: 20,
-                  child: IconButton(
-                    icon: Icon(
-                      Icons.arrow_back,
-                      color: Colors.white,
-                      size: 40,
-                    ),
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                    },
-                  ),
-                ),
-                Positioned(
+      body: SafeArea(
+        child: SingleChildScrollView(
+          child: Column(
+            children: [
+              Stack(
+                children: [
+                  ProductImage(url: productFormProvider.product.picture),
+                  Positioned(
                     top: 60,
-                    right: 20,
+                    left: 20,
                     child: IconButton(
                       icon: Icon(
-                        Icons.camera_alt_outlined,
+                        Icons.arrow_back,
                         color: Colors.white,
                         size: 40,
                       ),
-                      onPressed: () {},
-                    )),
-              ],
-            ),
-            _ProductForm(
-              product: productsService.selectedProduct,
-            )
-          ],
+                      onPressed: () {
+                        Navigator.of(context).pop();
+                      },
+                    ),
+                  ),
+                  Positioned(
+                      top: 60,
+                      right: 20,
+                      child: IconButton(
+                        icon: Icon(
+                          Icons.camera_alt_outlined,
+                          color: Colors.white,
+                          size: 40,
+                        ),
+                        onPressed: () async {
+                          productsService.isSaving
+                              ? const CircularProgressIndicator(
+                                  color: Colors.white,
+                                )
+                              : const Icon(Icons.camera_alt_outlined);
+                          String? urlImage = await _processImage();
+                          productsService.updateSelectedProductImage(urlImage!);
+                        },
+                      )),
+                  Positioned(
+                    top: 57,
+                    right: 80,
+                    child: IconButton(
+                      icon: Icon(
+                        Icons.image_search,
+                        color: Colors.white,
+                        size: 40,
+                      ),
+                      onPressed: () async {
+                        productsService.isSaving
+                            ? const CircularProgressIndicator(
+                                color: Colors.white,
+                              )
+                            : const Icon(Icons.camera_alt_outlined);
+                        String? urlImage = await _processImageFromGallery();
+                        productsService.updateSelectedProductImage(urlImage!);
+                      },
+                    ),
+                  ),
+                ],
+              ),
+              _ProductForm(
+                product: productsService.selectedProduct,
+              )
+            ],
+          ),
         ),
       ),
     );
+  }
+
+  Future<String?> _processImage() async {
+    final _picker = ImagePicker();
+    final XFile? pickedFile = await _picker.pickImage(
+      source: ImageSource.camera,
+      imageQuality: 100,
+    );
+
+    if (pickedFile == null) {
+      print('No seleccionó nada');
+      return null;
+    } else {
+      print('Tenemos imagen ${pickedFile.path}');
+      return pickedFile.path;
+    }
+  }
+
+  Future<String?> _processImageFromGallery() async {
+    final _picker = ImagePicker();
+    final XFile? pickedFile = await _picker.pickImage(source: ImageSource.gallery, imageQuality: 100);
+
+    if (pickedFile == null) {
+      return null;
+    } else {
+      return pickedFile.path;
+    }
   }
 }
 
@@ -128,13 +196,20 @@ class _ProductForm extends StatelessWidget {
                   }
                 },
               ),
+              SizedBox(
+                height: 30,
+              ),
+              _datePicker(context),
               SizedBox(height: 30),
               SwitchListTile.adaptive(
                 value: productFormProvider.product.available,
                 onChanged: (value) => productFormProvider.updateAvailability(value),
                 title: Text('Disponible'),
                 activeColor: Colors.indigo,
-              )
+              ),
+              SizedBox(
+                height: 100,
+              ),
             ],
           ),
         ),
@@ -147,5 +222,19 @@ class _ProductForm extends StatelessWidget {
         color: Colors.white,
         borderRadius: BorderRadius.only(bottomLeft: Radius.circular(25), bottomRight: Radius.circular(25)),
         boxShadow: [BoxShadow(color: Colors.black.withOpacity(0.05), offset: Offset(0, 5), blurRadius: 5)]);
+  }
+
+  TextFormField _datePicker(BuildContext context) {
+    return TextFormField(
+      initialValue: product.date,
+      decoration: InputDecoration(
+        labelText: 'Fecha de Registro',
+        filled: true,
+        prefixIcon: Icon(Icons.calendar_today),
+        enabledBorder: OutlineInputBorder(borderSide: BorderSide.none),
+        focusedBorder: OutlineInputBorder(borderSide: BorderSide(color: Colors.blue)),
+      ),
+      readOnly: true,
+    );
   }
 }
