@@ -12,10 +12,18 @@ class HomeScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final productsService = Provider.of<ProductsService>(context);
+    final authService = Provider.of<AuthService>(context, listen: false);
 
     return Scaffold(
       appBar: AppBar(
         title: Text('Productos'),
+        actions: [
+          IconButton(
+              icon: Icon(Icons.logout),
+              onPressed: () async {
+                await _handleLogout(context, authService);
+              }),
+        ],
       ),
       body: ListView.builder(
         itemCount: productsService.products.length + 1,
@@ -97,5 +105,10 @@ class HomeScreen extends StatelessWidget {
 
   String _formatDate(DateTime date) {
     return DateFormat('dd/MM/yyyy').format(date);
+  }
+
+  Future<void> _handleLogout(BuildContext context, AuthService authService) async {
+    await authService.logout();
+    Navigator.pushReplacementNamed(context, 'login');
   }
 }

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:seminariovalidacion/providers/provider.dart';
 import 'package:seminariovalidacion/providers/register_form_provider.dart';
+import 'package:seminariovalidacion/services/auth_service.dart';
+import 'package:seminariovalidacion/services/services.dart';
 import 'package:seminariovalidacion/ui/input_decorations.dart';
 import 'package:seminariovalidacion/widgets/widgets.dart';
 import 'package:intl/intl.dart';
@@ -116,16 +118,17 @@ class RegisterBtn extends StatelessWidget {
           ? null
           : () async {
               FocusScope.of(context).unfocus();
+              final authService = Provider.of<AuthService>(context, listen: false);
               if (!registerForm.isValidForm()) return;
+              final String? errorMessage = await authService.createUser(registerForm.email, registerForm.password);
 
-              registerForm.isLoading = true;
-
-              // Simulación de un registro exitoso con un retraso de 2 segundos
-              await Future.delayed(Duration(seconds: 2));
-
-              registerForm.isLoading = false;
-
-              Navigator.pushReplacementNamed(context, 'home');
+              if (errorMessage == null) {
+                print('done');
+                Navigator.restorablePushReplacementNamed(context, 'home');
+              } else {
+                NotificationService.showSnackbar(errorMessage);
+                registerForm.isLoading = false;
+              }
             },
     );
   }

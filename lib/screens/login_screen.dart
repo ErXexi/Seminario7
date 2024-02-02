@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:seminariovalidacion/services/auth_service.dart';
+import 'package:seminariovalidacion/services/services.dart';
 import 'package:seminariovalidacion/widgets/widgets.dart';
 import 'package:seminariovalidacion/ui/input_decorations.dart';
 import 'package:seminariovalidacion/providers/provider.dart';
@@ -53,19 +55,13 @@ class _LoginForm extends StatelessWidget {
             children: [
               TextFormField(
                 validator: (value) {
-                  String pattern =
-                      r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+                  String pattern = r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
                   RegExp regExp = new RegExp(pattern);
-                  return regExp.hasMatch(value ?? '')
-                      ? null
-                      : 'Introduce un email valido';
+                  return regExp.hasMatch(value ?? '') ? null : 'Introduce un email valido';
                 },
                 autocorrect: false,
                 keyboardType: TextInputType.emailAddress,
-                decoration: InputDecorations.authInputDecoration(
-                    hintText: 'john.doe@gmail.com',
-                    labelText: 'Email',
-                    prefixIcon: Icons.alternate_email_sharp),
+                decoration: InputDecorations.authInputDecoration(hintText: 'john.doe@gmail.com', labelText: 'Email', prefixIcon: Icons.alternate_email_sharp),
                 onChanged: (value) => loginForm.email = value,
               ),
               TextFormField(
@@ -76,12 +72,9 @@ class _LoginForm extends StatelessWidget {
                   return null;
                 },
                 autocorrect: false,
-                keyboardType: TextInputType.emailAddress,
-                decoration: InputDecorations.authInputDecoration(
-                    hintText: 'password',
-                    labelText: 'Password',
-                    prefixIcon: Icons.lock),
-                onChanged: (value) => loginForm.email = value,
+                keyboardType: TextInputType.visiblePassword,
+                decoration: InputDecorations.authInputDecoration(hintText: 'password', labelText: 'Password', prefixIcon: Icons.lock),
+                onChanged: (value) => loginForm.password = value,
               ),
               SizedBox(height: 30),
               LoginBtn()
@@ -111,15 +104,19 @@ class LoginBtn extends StatelessWidget {
             ? null
             : () async {
                 FocusScope.of(context).unfocus();
+                final authService = Provider.of<AuthService>(context, listen: false);
                 if (!loginForm.isValidForm()) return;
 
                 loginForm.isLoading = true;
+                final String? errorMessage = await authService.login(loginForm.email, loginForm.password);
 
-                await Future.delayed(Duration(seconds: 2));
-
-                loginForm.isLoading = false;
-
-                Navigator.pushReplacementNamed(context, 'home');
+                if (errorMessage == null) {
+                  print('done');
+                  Navigator.pushReplacementNamed(context, 'home');
+                } else {
+                  NotificationService.showSnackbar(errorMessage);
+                  loginForm.isLoading = false;
+                }
               });
   }
 }
@@ -129,11 +126,10 @@ class CreateCuenta extends StatelessWidget {
   Widget build(BuildContext context) {
     return TextButton(
       onPressed: () {
-        Navigator.pushReplacementNamed(context, 'signup');
+        Navigator.pushReplacementNamed(context, 'registrar');
       },
       style: ButtonStyle(
-        overlayColor:
-            MaterialStateProperty.resolveWith((states) => Colors.grey[300]),
+        overlayColor: MaterialStateProperty.resolveWith((states) => Colors.grey[300]),
       ),
       child: Text(
         'Crear una nueva cuenta',
