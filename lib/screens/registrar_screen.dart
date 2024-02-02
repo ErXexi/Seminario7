@@ -52,43 +52,6 @@ class RegisterForm extends StatelessWidget {
         child: Column(
           children: [
             TextFormField(
-              autocorrect: false,
-              decoration: InputDecorations.authInputDecoration(
-                hintText: 'John',
-                labelText: 'Nombre',
-                prefixIcon: Icons.person,
-              ),
-              onChanged: (value) {
-                registerForm.nombres = value;
-              },
-            ),
-            TextFormField(
-              decoration: InputDecorations.authInputDecoration(
-                hintText: 'Doe',
-                labelText: 'Apellidos',
-                prefixIcon: Icons.person,
-              ),
-              onChanged: (value) {
-                registerForm.apellidos = value;
-              },
-            ),
-            TextFormField(
-                validator: (value) {
-                  if (value == null || value.length < 9) {
-                    return 'El numero debe contener 9 numeros';
-                  }
-                  return null;
-                },
-                keyboardType: TextInputType.phone,
-                decoration: InputDecorations.authInputDecoration(
-                  hintText: 'Teléfono',
-                  labelText: 'Teléfono',
-                  prefixIcon: Icons.phone,
-                ),
-                onChanged: (value) {
-                  registerForm.telefono = value;
-                }),
-            TextFormField(
               validator: (value) {
                 String pattern = r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
                 RegExp regExp = new RegExp(pattern);
@@ -122,42 +85,6 @@ class RegisterForm extends StatelessWidget {
               ),
               onChanged: (value) {
                 registerForm.password = value;
-              },
-            ),
-            ListTile(
-              leading: Icon(Icons.calendar_today),
-              title: Text(
-                'Fecha nacimiento',
-                style: TextStyle(fontSize: 16),
-              ),
-              trailing: Text(
-                registerForm.fechaNacimiento != null ? DateFormat('dd/MM/yyyy').format(registerForm.fechaNacimiento!) : '',
-                style: TextStyle(fontSize: 16),
-              ),
-              onTap: () async {
-                DateTime? pickedDate = await showDatePicker(
-                  context: context,
-                  initialDate: DateTime.now(),
-                  firstDate: DateTime(1900),
-                  lastDate: DateTime.now(),
-                );
-                if (pickedDate != null) {
-                  registerForm.fechaNacimiento = pickedDate;
-                }
-              },
-            ),
-            DropdownButton<String>(
-              value: registerForm.sexo,
-              items: ['Masculino', 'Femenino', 'Otro', 'Helicóptero de combate apache', 'Selecciona sexo'].map((String value) {
-                return DropdownMenuItem<String>(
-                  value: value,
-                  child: Text(value),
-                );
-              }).toList(),
-              onChanged: (newValue) {
-                if (newValue != null) {
-                  registerForm.sexo = newValue;
-                }
               },
             ),
             SizedBox(height: 30),

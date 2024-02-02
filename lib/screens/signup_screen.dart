@@ -4,8 +4,8 @@ import 'package:seminariovalidacion/widgets/widgets.dart';
 import 'package:seminariovalidacion/ui/input_decorations.dart';
 import 'package:seminariovalidacion/providers/provider.dart';
 
-class LoginScreen extends StatelessWidget {
-  const LoginScreen({super.key});
+class SignUpScreen extends StatelessWidget {
+  const SignUpScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -53,19 +53,13 @@ class _LoginForm extends StatelessWidget {
             children: [
               TextFormField(
                 validator: (value) {
-                  String pattern =
-                      r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
+                  String pattern = r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
                   RegExp regExp = new RegExp(pattern);
-                  return regExp.hasMatch(value ?? '')
-                      ? null
-                      : 'Introduce un email valido';
+                  return regExp.hasMatch(value ?? '') ? null : 'Introduce un email valido';
                 },
                 autocorrect: false,
                 keyboardType: TextInputType.emailAddress,
-                decoration: InputDecorations.authInputDecoration(
-                    hintText: 'john.doe@gmail.com',
-                    labelText: 'Email',
-                    prefixIcon: Icons.alternate_email_sharp),
+                decoration: InputDecorations.authInputDecoration(hintText: 'john.doe@gmail.com', labelText: 'Email', prefixIcon: Icons.alternate_email_sharp),
                 onChanged: (value) => loginForm.email = value,
               ),
               TextFormField(
@@ -77,10 +71,7 @@ class _LoginForm extends StatelessWidget {
                 },
                 autocorrect: false,
                 keyboardType: TextInputType.emailAddress,
-                decoration: InputDecorations.authInputDecoration(
-                    hintText: 'password',
-                    labelText: 'Password',
-                    prefixIcon: Icons.lock),
+                decoration: InputDecorations.authInputDecoration(hintText: 'password', labelText: 'Password', prefixIcon: Icons.lock),
                 onChanged: (value) => loginForm.email = value,
               ),
               SizedBox(height: 30),
@@ -127,18 +118,20 @@ class LoginBtn extends StatelessWidget {
 class CreateCuenta extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return TextButton(
-      onPressed: () {
-        Navigator.pushReplacementNamed(context, 'signup');
-      },
-      style: ButtonStyle(
-        overlayColor:
-            MaterialStateProperty.resolveWith((states) => Colors.grey[300]),
-      ),
-      child: Text(
-        'Crear una nueva cuenta',
-        style: TextStyle(fontSize: 18, color: Colors.black87),
-      ),
-    );
+    return MaterialButton(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        disabledColor: Colors.grey,
+        elevation: 0,
+        color: Colors.deepPurple,
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: 80, vertical: 15),
+          child: Text(
+            'Registrar',
+            style: TextStyle(color: Colors.white),
+          ),
+        ),
+        onPressed: () {
+          Navigator.pushNamed(context, 'registrar');
+        });
   }
 }

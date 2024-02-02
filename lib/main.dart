@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:seminariovalidacion/screens/screens.dart';
+import 'package:seminariovalidacion/screens/signup_screen.dart';
 import 'package:seminariovalidacion/services/services.dart';
 
 void main() => runApp(AppState());
@@ -25,10 +26,12 @@ class MyApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       title: 'Productos App',
-      initialRoute: 'home',
+      initialRoute: 'login',
       routes: {
         '/': (_) => LoginScreen(),
+        'login':(_) => LoginScreen(),
         'home': (_) => HomeScreen(),
+        'signup': (_) => SignUpScreen(),
         'registrar': (_) => RegisterScreen(),
         'product': (_) => ProductScreen(),
       },
